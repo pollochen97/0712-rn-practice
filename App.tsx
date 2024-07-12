@@ -141,15 +141,18 @@ const App = () => {
   const [isLoadingUserStories, setIsLoadingUserStories] =
     useState<boolean>(false);
 
-  // const userPostsPageSize = 2;
-  // const [userPostsCurrentPage, setUserPostsCurrentPage] = useState<number>(1); //local state for counter
-  // const [userPostsRenderData, setUserPostsRenderData] = useState<IUserPost[]>(
-  //   [],
-  // );
-  // const [isLoadingUserPosts, setIsLoadingUserPosts] = useState<boolean>(false);
+  const userPostsPageSize = 2;
+  const [userPostsCurrentPage, setUserPostsCurrentPage] = useState<number>(1); //local state for counter
+  const [userPostsRenderData, setUserPostsRenderData] = useState<IUserPost[]>(
+    [],
+  );
+  const [isLoadingUserPosts, setIsLoadingUserPosts] = useState<boolean>(false);
 
+  type tupleType<T extends any[]> = T;
+  //Generic Constraints
+  //使用泛型！去設定可以丟進去的type是什麼，但要限制只能丟array!
   const pagination = (
-    database: IUserStory[],
+    database: tupleType<any[]>,
     currentPage: number,
     pageSize: number,
   ) => {
@@ -167,10 +170,10 @@ const App = () => {
     setUserStoriesRenderData(getInitialStories);
     setIsLoadingUserStories(false);
 
-    // setIsLoadingUserPosts(true);
-    // const getInitialPosts = pagination(userPosts, 1, userPostsPageSize);
-    // setUserPostsRenderData(getInitialPosts);
-    // setIsLoadingUserPosts(false);
+    setIsLoadingUserPosts(true);
+    const getInitialPosts = pagination(userPosts, 1, userPostsPageSize);
+    setUserPostsRenderData(getInitialPosts);
+    setIsLoadingUserPosts(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -195,6 +198,7 @@ const App = () => {
               </View>
               <View style={globalStyle.userStoryContainer}>
                 <FlatList
+                  //這個可能之後不能用
                   onEndReachedThreshold={0.5} //滑到哪裡的時候開始撈下一步的資料
                   onEndReached={() => {
                     if (isLoadingUserStories) {
@@ -209,7 +213,7 @@ const App = () => {
                     if (contentToAppend.length > 0) {
                       setUserStoriesCurrentPage(userStoriesCurrentPage + 1);
                       setUserStoriesRenderData(prev => [
-                        ...prev,
+                        ...prev, //某一種語法糖
                         ...contentToAppend,
                       ]);
                     }
@@ -229,27 +233,27 @@ const App = () => {
               </View>
             </>
           }
-          // onEndReachedThreshold={0.5} //滑到哪裡的時候開始撈下一步的資料
-          // onEndReached={() => {
-          //   if (isLoadingUserPosts) {
-          //     return;
-          //   }
-          //   setIsLoadingUserPosts(true);
-          //   console.log(
-          //     '讀取資料中，現在讀取第' + (userPostsCurrentPage + 1) + '頁',
-          //   );
-          //   const contentToAppend = pagination(
-          //     userPosts,
-          //     userPostsCurrentPage + 1,
-          //     userPostsPageSize,
-          //   );
-          //   if (contentToAppend.length > 0) {
-          //     setUserPostsCurrentPage(userPostsCurrentPage + 1);
-          //     setUserPostsRenderData(prev => [...prev, ...contentToAppend]);
-          //   }
-          //   setIsLoadingUserPosts(false);
-          // }}
-          data={userPosts}
+          onEndReachedThreshold={0.5} //滑到哪裡的時候開始撈下一步的資料
+          onEndReached={() => {
+            if (isLoadingUserPosts) {
+              return;
+            }
+            setIsLoadingUserPosts(true);
+            console.log(
+              '讀取資料中，現在讀取第' + (userPostsCurrentPage + 1) + '頁',
+            );
+            const contentToAppend = pagination(
+              userPosts,
+              userPostsCurrentPage + 1,
+              userPostsPageSize,
+            );
+            if (contentToAppend.length > 0) {
+              setUserPostsCurrentPage(userPostsCurrentPage + 1);
+              setUserPostsRenderData(prev => [...prev, ...contentToAppend]);
+            }
+            setIsLoadingUserPosts(false);
+          }}
+          data={userPostsRenderData}
           showsVerticalScrollIndicator={false}
           renderItem={({item}) => (
             <View style={globalStyle.userPostContainer}>
